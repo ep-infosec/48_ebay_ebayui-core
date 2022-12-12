@@ -1,0 +1,25 @@
+import { processHtmlAttributes } from "../../common/html-attributes"
+
+static function toJSON() {
+    return {
+        disabled: this.disabled
+    };
+}
+
+static var ignoredAttributes = ["toJSON", "variant"];
+
+$ {
+    input.toJSON = toJSON;
+    var htmlAttributes = processHtmlAttributes(data, ignoredAttributes);
+}
+<button
+    ...htmlAttributes
+    onClick("handleClick")
+    onKeydown("handleKeydown")
+    onFocus("handleFocus")
+    onBlur("handleBlur")
+    class=[input.class, "fake-link", input.variant === 'standalone' && 'standalone-link']
+    data-ebayui=true
+    type=(input.type || "button")>
+    <${input.renderBody}/>
+</button>

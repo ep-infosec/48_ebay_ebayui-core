@@ -1,0 +1,114 @@
+import { processHtmlAttributes } from "../../common/html-attributes"
+import IconButton from '<ebay-icon-button>'
+import Button from '<ebay-button>'
+
+static var ignoredAttributes = [
+    "class",
+    "style",
+    "type",
+    "text",
+    "icon",
+    "a11yText",
+    "noToggleIcon",
+    "expanded",
+    "reverse",
+    "fixWidth",
+    "borderless",
+    "size",
+    "priority",
+    "iconTag",
+    "disabled",
+    "variant",
+    "items",
+    "label",
+    "textAlign"
+];
+
+$ {
+    var labelId = input.prefixId && component.getElId("label");
+    var isOverflowVariant = input.variant === "overflow";
+    var isFormVariant = input.variant === "form";
+    var isButtonVariant = true;
+    if (input.borderless) {
+        isOverflowVariant = false;
+    }
+    var priority = null;
+    var prefix = 'expand-btn'
+    var variant;
+    var isIconVariant = input.variant === 'icon' || isOverflowVariant;
+
+    var tagName = Button;
+    if (isFormVariant) {
+        prefix = 'btn';
+        variant = 'form';
+    } else if (isIconVariant) {
+        tagName = IconButton;
+        isButtonVariant = false;
+    } else {
+        priority = input.priority
+        prefix = 'btn';
+    }
+}
+<span
+    ...processHtmlAttributes(input, ignoredAttributes)
+    class=["fake-menu-button", input.class]
+    style=input.style
+    onExpander-expand("handleExpand")
+    onExpander-collapse("handleCollapse")
+    onMousedown("handleMousedown")>
+    <${tagName}
+        class=[
+            `fake-menu-button__button`
+        ]
+        size=input.size
+        borderless=input.borderless
+        priority=priority
+        variant=variant
+        transparent=(isIconVariant && input.transparent)
+        icon-only=(!input.text && !input.icon && !isOverflowVariant)
+        aria-expanded="false"
+        aria-label=input.a11yText
+        disabled=input.disabled
+        no-toggle-icon=input.noToggleIcon
+        on-escape("handleButtonEscape")
+        key="button">
+        <if(isOverflowVariant)>
+            <ebay-overflow-icon/>
+        </if>
+        <else>
+            <span class=[
+                `${prefix}__cell`,
+                input.label && "menu-button__control--custom-label",
+                input.textAlign === "center" && "expand-btn__cell--center"
+            ]>
+                <if(input.label)>
+                    <${input.label.renderBody}/>
+                </if>
+                <else>
+                    <if(input.icon)>
+                        <${input.icon}/>
+                    </if>
+                    <if(input.text)>
+                        <span>${input.text}</span>
+                    </if>
+                </else>
+                <if(isButtonVariant && !input.noToggleIcon)>
+                    <ebay-dropdown-icon/>
+                </if>
+            </span>
+        </else>
+    </>
+    <ebay-fake-menu
+        class-prefix="fake-menu-button"
+        type=input.type
+        reverse=(isOverflowVariant ? !input.reverse : input.reverse)
+        fix-width=input.fixWidth
+        tabindex=-1
+        on-keydown("handleMenuKeydown")
+        on-select("handleMenuSelect")
+        key="content">
+        <for|item, index| of=(input.items || [])>
+            <@item ...item/>
+        </for>
+    </ebay-fake-menu>
+</span>

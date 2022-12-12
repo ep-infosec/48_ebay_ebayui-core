@@ -1,0 +1,80 @@
+import { processHtmlAttributes } from "../../common/html-attributes"
+
+static var ignoredAttributes = [
+    "name",
+    "grow",
+    "borderless",
+    "disabled",
+    "fluid",
+    "invalid",
+    "buttonName",
+    "options",
+    "truncate",
+    "prefixLabel",
+    "prefixId",
+    "unselectedText",
+    "floatingLabel",
+    "collapseOnSelect"
+];
+
+$ var selectedOption = input.options[state.selectedIndex];
+$ var selectedText = selectedOption && selectedOption.text;
+$ var labelId = input.prefixId && component.getElId("label");
+$ var unselectedText = input.unselectedText || '-';
+$ var displayText = selectedText || unselectedText;
+
+<${input.truncate && !input.fluid ? "div" : "span"}
+    ...processHtmlAttributes(input, ignoredAttributes)
+    key="container"
+    class=["listbox-button", input.class, input.fluid && "listbox-button--fluid"]
+    on-expander-expand("handleExpand")
+    on-expander-collapse("handleCollapse")>
+    <button
+        key="button"
+        class=[
+            "listbox-button__control",
+            'btn',
+            'btn--form',
+            input.borderless && "btn--borderless",
+            input.truncate && "btn--truncated",
+            input.floatingLabel && "btn--floating-label"
+        ]
+        value=selectedText
+        type="button"
+        disabled=input.disabled
+        name=input.buttonName
+        aria-haspopup="listbox"
+        aria-labelledby=(labelId && `${input.prefixId} ${labelId}`)
+        aria-invalid=(input.invalid && "true")>
+        <span class="btn__cell">
+            <if (input.floatingLabel)>
+                <span class=[
+                    "btn__floating-label",
+                    "btn__floating-label--animate",
+                    !selectedText && "btn__floating-label--inline",
+                    ]>${input.floatingLabel}</span>
+                <span class="btn__text">${displayText}</span>
+            </if>
+            <else-if (input.prefixLabel)>
+                <span class="btn__label">${input.prefixLabel} </span>
+                <span class="btn__text">${displayText}</span>
+            </else-if>
+            <else>
+                <span id=labelId class="btn__text">${displayText}</span>
+            </else>
+            <ebay-dropdown-icon/>
+        </span>
+    </button>
+    <ebay-listbox
+        key="options"
+        class="listbox-button__listbox"
+        name=input.name
+        tabindex=-1
+        list-selection=input.listSelection
+        on-change("handleListboxChange")
+        on-escape("handleListboxEscape")>
+        <for|option| of=(input.options || [])>
+            <@option ...option selected=(selectedOption === option)/>
+        </for>
+    </ebay-listbox>
+</>

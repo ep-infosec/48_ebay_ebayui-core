@@ -1,0 +1,130 @@
+import { processHtmlAttributes } from "../../common/html-attributes"
+import IconButton from '<ebay-icon-button>'
+import Button from '<ebay-button>'
+
+static var ignoredAttributes = [
+    "class",
+    "style",
+    "type",
+    "text",
+    "icon",
+    "a11yText",
+    "noToggleIcon",
+    "expanded",
+    "reverse",
+    "fixWidth",
+    "borderless",
+    "size",
+    "priority",
+    "iconTag",
+    "disabled",
+    "variant",
+    "items",
+    "label",
+    "textAlign",
+    "prefixLabel",
+    "prefixId",
+    "split",
+    "collapseOnSelect"
+];
+
+$ {
+    var labelId = input.prefixId && component.getElId("label");
+    var isFormVariant = input.variant === "form"
+    var variant;
+    var isOverflowVariant = input.variant === "overflow";
+    var isButtonVariant = false;
+    var priority = null;
+    if (input.borderless) {
+        // Force button variant for borderless
+        isOverflowVariant = false;
+        isFormVariant = false;
+    }
+
+    var isIconVariant = input.variant === 'icon' || isOverflowVariant;
+
+    tagName = Button
+    var tagName;
+    if (isIconVariant) {
+        tagName = IconButton;
+    } else if (isFormVariant) {
+        variant = 'form';
+        isButtonVariant = true;
+    } else {
+        isButtonVariant = true;
+        priority = input.priority
+    }
+    var separatorCount = 0;
+}
+
+<span
+    ...processHtmlAttributes(input, ignoredAttributes)
+    class=["menu-button", input.class]
+    style=input.style
+    onExpander-expand("handleExpand")
+    onExpander-collapse("handleCollapse")
+    onMousedown("handleMousedown")>
+    <${tagName}
+        class=[
+            `menu-button__button`
+        ]
+        size=input.size
+        priority=priority
+        borderless=input.borderless
+        variant=variant
+        aria-expanded="false"
+        aria-haspopup="true"
+        transparent=(isIconVariant && input.transparent)
+        aria-label=input.a11yText
+        aria-labelledby=(labelId && `${input.prefixId} ${labelId}`)
+        split=(isButtonVariant && input.split)
+        disabled=input.disabled
+        no-toggle-icon=input.noToggleIcon
+        on-escape("handleButtonEscape")
+        key="button">
+        <if(isOverflowVariant)>
+            <ebay-overflow-small-icon/>
+        </if>
+        <else>
+                <if(input.label)>
+                    <if(input.prefixLabel)>
+                        <span class="menu-button-prefix-label">${input.prefixLabel}</span>
+                        <${input.label.renderBody}/>
+                    </if>
+                    <else >
+                        <span id=labelId>
+                            <${input.label.renderBody}/>
+                        </span>
+                    </else>
+                </if>
+                <else>
+                    <if(input.icon)>
+                        <${input.icon}/>
+                    </if>
+                    <if(input.text)>
+                        <span id=labelId>${input.text}</span>
+                    </if>
+                </else>
+                <if(isButtonVariant && !input.noToggleIcon)>
+                    <ebay-dropdown-icon/>
+                </if>
+        </else>
+    </>
+    <ebay-menu
+        class-prefix="menu-button"
+        type=input.type
+        reverse=(isOverflowVariant ? !input.reverse : input.reverse)
+        fix-width=input.fixWidth
+        tabindex=-1
+        on-keydown("handleMenuKeydown")
+        on-change("handleMenuChange")
+        on-select("handleMenuSelect")
+        key="content">
+        <for|item,index| of=(input.items || [])>
+            $ if (item.separator) {
+                separatorCount++;
+            }
+            <@item  ...item checked=component.isChecked(index - separatorCount) />
+        </for>
+    </ebay-menu>
+</span>
